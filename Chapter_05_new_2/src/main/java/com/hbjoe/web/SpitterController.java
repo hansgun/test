@@ -28,6 +28,7 @@ public class SpitterController {
   public String processRegistration(Spitter spitter) {
 	  spitterRepository.save(spitter);
 	  
-	  return "redirect:/spitter/" + spitter.getUsername();
+	  return "redirect:/spitter/" + 
+	  	spitter.getUsername();
   }
 }
