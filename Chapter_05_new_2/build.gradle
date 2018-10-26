@@ -12,25 +12,21 @@ buildscript {
     repositories {
         jcenter()
     }
+
     dependencies {
-        classpath 'org.akhikhl.gretty:gretty:+'
+        classpath 'com.bmuschko:gradle-cargo-plugin:2.4'
     }
 }
 
 apply plugin: 'java'
 apply plugin: 'eclipse-wtp'
 apply plugin: 'war'
-war {
-	baseName= 'market2'
-}
-
-apply plugin: 'org.akhikhl.gretty'
+apply plugin: 'com.bmuschko.cargo'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8' 
-
 
 version = '1.0'
 
@@ -43,16 +39,20 @@ slf4j: '1.7.12',
 mockitoVersion: '1.9.5',
 jspApiVersion: '2.1',
 jspElVersion: '2.2.4',
-jstlVersion: '1.2'
+jstlVersion: '1.2',
+cargoVersion: '1.4.5'
 ]
 
 eclipse {
     // 빌드하고나면 프로젝트정보도 같이 지워지는데, Gradle프로젝트임을 인식시켜줍니다.
     project.natures "org.springsource.ide.eclipse.gradle.core.nature"
     wtp {
+        component {
+            contextPath = 'spittr'
+        }
         facet {
-            facet name: 'jst.web', version: '3.1'
-            facet name: 'jst.java', version: '1.8'
+            facet name: 'jst.web', version: '3.1' // Servlet Spec version 지정
+            facet name: 'jst.java', version: '1.8' //Java version 지정
         }
     }
 }
@@ -76,24 +76,48 @@ dependencies {
     providedCompile "javax.servlet:javax.servlet-api:${version.servletAPI}"
     providedCompile "javax.servlet.jsp:jsp-api:${version.jspApiVersion}"
     providedCompile "javax.el:javax.el-api:${version.jspElVersion}" 
+
     compile "javax.servlet:jstl:${version.jstlVersion}"
     compile "org.springframework:spring-webmvc:${version.spring}"
-     
     compile "org.slf4j:slf4j-api:${version.slf4j}"
     compile group: 'commons-collections', name: 'commons-collections', version: "${version.commonsCollections}"
-    // https://mvnrepository.com/artifact/org.apache.commons/commons-lang3
 	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
+	// https://mvnrepository.com/artifact/javax.validation/validation-api
+	compile group: 'javax.validation', name: 'validation-api', version: '2.0.1.Final'
+	
     testCompile group: 'junit', name: 'junit', version: "${version.junit}"
-    // https://mvnrepository.com/artifact/io.rest-assured/spring-mock-mvc
 	testCompile group: 'io.rest-assured', name: 'spring-mock-mvc', version: '3.0.0'
 	testCompile "org.mockito:mockito-core:${version.mockitoVersion}"
-
+	
+    cargo "org.codehaus.cargo:cargo-core-uberjar:${version.cargoVersion}",
+      "org.codehaus.cargo:cargo-ant:${version.cargoVersion}"
 }
 
 test {
     systemProperties 'property': 'value'
 }
 
+cargo {
+    containerId = 'tomcat8x'
+    port = 8093
+
+    deployable {
+    	file = file('/Users/han/Documents/git/Chapter_05_new_2/build/libs/spittr-1.0.war')
+        context = 'spittr'
+    }
+
+    local {
+        homeDir = file('/user/local/tomcat8')
+        outputFile = file('build/output.log')
+        timeout = 60000
+    }
+}
+
+war {
+	baseName= 'spittr'
+}
+
+// archive(.jar) deploy
 uploadArchives {
     repositories {
        flatDir {

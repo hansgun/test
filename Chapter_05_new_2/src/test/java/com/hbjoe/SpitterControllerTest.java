@@ -23,7 +23,7 @@ public class SpitterControllerTest {
 		  SpitterController controller = new SpitterController(mockRepository);
 		  MockMvc mocMvc = standaloneSetup(controller).build();
 		  
-		  mocMvc.perform(get("/spittle/register")).andExpect(view().name("registerForm"));
+		  mocMvc.perform(get("/spitter/register")).andExpect(view().name("registerForm"));
 	  }
 	  
 	  @Test
